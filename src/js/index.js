@@ -1,22 +1,16 @@
 var IngredientList = React.createClass({
-	deleteClick: function() {
-		alert("You have clicked delete");
-	},
-	editClick: function() {
-		alert("You have clicked edit");
-	},
+
 	render: function() {
 		var rows = [];
 		var Panel = ReactBootstrap.Panel;
 		var Button = ReactBootstrap.Button;
-		this.props.ingredients.forEach(function(ingredient) {
+		this.props.recipe.ingredients.forEach(function(ingredient) {
 			rows.push(<Panel>{ingredient}</Panel>)
 		});
 		return (
 			<div>
 			  {rows}
-				<Button bsStyle="danger" onClick={this.deleteClick}>Delete</Button>
-				<Button onClick={this.editClick}>Edit</Button>
+				<EditRecipeModal recipe={this.props.recipe} />
 			</div>
 		);
 	}
@@ -33,9 +27,9 @@ var RecipeList = React.createClass({
 		var Panel = ReactBootstrap.Panel;
 		var Button = ReactBootstrap.Button;
 		this.props.recipes.forEach(function(recipe) {
-			rows.push(<Panel header={recipe.name} eventKey={recipe.index}>
+			rows.push(<Panel header={recipe.name}>
 				<p>Ingredients:</p>
-				<IngredientList ingredients={recipe.ingredients} />
+				<IngredientList recipe={recipe} />
 				</Panel>
 				);
 		});
@@ -52,56 +46,104 @@ var RecipeTable = React.createClass({
 		return (
 			<div>
 			  <RecipeList recipes={this.props.recipes} />
-				<NewRecipeModal />
+				<AddRecipeModal />
 		  </div>
 		);
 	}
 });
 
-var RecipeForm = React.createClass({
+var EditRecipeModal = React.createClass({
+
   getInitialState: function() {
-    return {
-      value: ''
+    return { 
+    	showModal: false,
+    	name: this.props.recipe.name,
+    	ingredients: this.props.recipe.ingredients 
     };
   },
 
+  close: function() {
+    this.setState({ showModal: false });
+  },
+
+  open: function() {
+    this.setState({ showModal: true });
+  },
+
+  editRecipe: function() {
+  	alert("Edit a recipe");
+  },
+
+  deleteClick: function() {
+  	alert("You have clicked delete");
+  },
+
   getValidationState: function() {
-    const length = this.state.value.length;
+    const length = this.state.name.length;
     if (length > 2) return 'success';
     else if (length > 0) return 'error';
   },
 
-  handleChange: function(e) {
-    this.setState({ value: e.target.value });
+  handleNameChange: function(e) {
+    this.setState({ name: e.target.value });
+  },
+
+  handleIngredientChange: function(e) {
+  	this.setState({ ingredient: e.target.value });
+  },
+
+  handleSubmit: function(e) {
+  	e.preventDefault();
+  	var name = this.state.name;
+  	var ingredients = this.state.ingredients;
+  	this.setState({name: '', ingredients: []});
   },
 
   render: function() {
-  	var FormGroup = ReactBootstrap.FormGroup;
-  	var FormControl = ReactBootstrap.FormControl;
-  	var ControlLabel = ReactBootstrap.ControlLabel;
+  	var Modal = ReactBootstrap.Modal;
+		var Button = ReactBootstrap.Button;
+		var FormGroup = ReactBootstrap.FormGroup;
+		var FormControl = ReactBootstrap.FormControl;
+		var ControlLabel = ReactBootstrap.ControlLabel;
     return (
-      <form>
-        <FormGroup controlId="formBasicText" validationState={this.getValidationState()}>
-	        <ControlLabel>Recipe</ControlLabel>
-          <FormControl type="text"
-            value={this.state.value}
-            placeholder="Recipe name"
-            onChange={this.handleChange}/>
-	        <ControlLabel>Ingredients</ControlLabel>
-          <FormControl type="text"
-            value={this.state.value}
-            placeholder="Enter ingredients separated by commas"
-            onChange={this.handleChange}/>
-        </FormGroup>
-      </form>
+      <div>
+	      <Button bsStyle="danger" onClick={this.deleteClick}>Delete</Button>
+      	<Button onClick={this.open}>Edit Recipe</Button>
+
+        <Modal show={this.state.showModal} onHide={this.close}>
+          <Modal.Header closeButton>
+            <Modal.Title>Edit Recipe</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+
+            <form onSubmit={this.handleSubmit}>
+              <FormGroup controlId="formBasicText" validationState={this.getValidationState()}>
+      	        <ControlLabel>Recipe</ControlLabel>
+                <FormControl type="text" value={this.state.name} onChange={this.handleNameChange}/>
+      	        <ControlLabel>Ingredients</ControlLabel>
+                <FormControl type="text" value={this.state.ingredients} onChange={this.handleIngredientChange}/>
+              </FormGroup>
+            </form>
+
+          </Modal.Body>
+          <Modal.Footer>
+          	<Button onClick={this.editRecipe} bsStyle="primary">Edit Recipe</Button>
+            <Button onClick={this.close}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
     );
   }
 });
 
-var NewRecipeModal = React.createClass({
+var AddRecipeModal = React.createClass({
 
   getInitialState: function() {
-    return { showModal: false };
+    return { 
+    	showModal: false,
+    	name: '',
+    	ingredients: [] 
+    };
   },
 
   close: function() {
@@ -116,9 +158,22 @@ var NewRecipeModal = React.createClass({
   	alert("Add a recipe");
   },
 
+  getValidationState: function() {
+    const length = this.state.name.length;
+    if (length > 2) return 'success';
+    else if (length > 0) return 'error';
+  },
+
+  handleChange: function(e) {
+    this.setState({ value: e.target.value });
+  },
+
   render: function() {
   	var Modal = ReactBootstrap.Modal;
 		var Button = ReactBootstrap.Button;
+		var FormGroup = ReactBootstrap.FormGroup;
+		var FormControl = ReactBootstrap.FormControl;
+		var ControlLabel = ReactBootstrap.ControlLabel;
     return (
       <div>
       	<Button onClick={this.open} bsStyle="primary">Add Recipe</Button>
@@ -128,9 +183,20 @@ var NewRecipeModal = React.createClass({
             <Modal.Title>Add Recipe</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-
-	          <RecipeForm />
-
+	          <form>
+	            <FormGroup controlId="formBasicText" validationState={this.getValidationState()}>
+	    	        <ControlLabel>Recipe</ControlLabel>
+	              <FormControl type="text"
+	                value={this.state.name}
+	                placeholder="Recipe"
+	                onChange={this.handleChange}/>
+	    	        <ControlLabel>Ingredients</ControlLabel>
+	              <FormControl type="text"
+	                value={this.state.ingredients}
+	                placeholder="Enter ingredients separated by commas"
+	                onChange={this.handleChange}/>
+	            </FormGroup>
+	          </form>
           </Modal.Body>
           <Modal.Footer>
           	<Button onClick={this.addRecipe} bsStyle="primary">Add Recipe</Button>
