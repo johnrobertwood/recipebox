@@ -1,33 +1,38 @@
 var IngredientList = React.createClass({
 
+	getInitialState: function() {
+		return {recipe: this.props.recipe}
+	},
+	handleRecipeEdit: function(recipe) {
+		this.setState({recipe: recipe});
+	},
 	render: function() {
 		var rows = [];
 		var Panel = ReactBootstrap.Panel;
 		var Button = ReactBootstrap.Button;
-		this.props.recipe.ingredients.forEach(function(ingredient) {
+		this.state.recipe.ingredients.forEach(function(ingredient) {
 			rows.push(<Panel>{ingredient}</Panel>)
 		});
 		return (
 			<div>
 			  {rows}
-				<EditRecipeModal recipe={this.props.recipe} />
+				<EditRecipeModal recipe={this.props.recipe} onRecipeEdit={this.handleRecipeEdit} />
 			</div>
 		);
 	}
 });
 
 var RecipeList = React.createClass({
-	addClick: function() {
-		alert("You have clicked Add Recipe");
+	getInitialState: function() {
+		return {recipes: this.props.recipes}
 	},
 	render: function() {
 		var rows = [];
 		var ingredients = [];
 		var Accordion = ReactBootstrap.Accordion;
 		var Panel = ReactBootstrap.Panel;
-		var Button = ReactBootstrap.Button;
 		var index = 0;
-		this.props.recipes.forEach(function(recipe) {
+		this.state.recipes.forEach(function(recipe) {
 			rows.push(<Panel header={recipe.name} eventKey={index++}>
 				<p>Ingredients:</p>
 				<IngredientList recipe={recipe} />
@@ -47,8 +52,10 @@ var RecipeTable = React.createClass({
 		return {recipes: this.props.recipes}
 	},
 	handleRecipeSubmit: function(recipe) {
-		//TODO: submit change and refresh the list
 		RECIPES.push(recipe);
+		this.setState({recipes: RECIPES});
+	},
+	handleRecipeUpdate: function() {
 		this.setState({recipes: RECIPES});
 	},
 	render: function() {
@@ -77,10 +84,6 @@ var AddRecipeModal = React.createClass({
 
   open: function() {
     this.setState({ showModal: true });
-  },
-
-  addRecipe: function() {
-  	alert("Add a recipe");
   },
 
   getValidationState: function() {
@@ -164,14 +167,6 @@ var EditRecipeModal = React.createClass({
     this.setState({ showModal: true });
   },
 
-  editRecipe: function() {
-  	alert("Edit a recipe");
-  },
-
-  deleteClick: function() {
-  	alert("You have clicked delete");
-  },
-
   getValidationState: function() {
     const length = this.state.name.length;
     if (length > 2) return 'success';
@@ -183,14 +178,15 @@ var EditRecipeModal = React.createClass({
   },
 
   handleIngredientChange: function(e) {
-  	this.setState({ ingredient: e.target.value });
+  	this.setState({ ingredients: e.target.value });
   },
 
   handleSubmit: function(e) {
   	e.preventDefault();
   	var name = this.state.name;
-  	var ingredients = this.state.ingredients;
-  	this.setState({name: '', ingredients: []});
+  	var ingredients = this.state.ingredients.split(',')
+  	this.props.onRecipeEdit({name: name, ingredients: ingredients});
+  	this.close();
   },
 
   render: function() {
@@ -210,7 +206,7 @@ var EditRecipeModal = React.createClass({
           </Modal.Header>
           <Modal.Body>
 
-            <form onSubmit={this.handleSubmit}>
+            <form>
               <FormGroup controlId="formBasicText" validationState={this.getValidationState()}>
       	        <ControlLabel>Recipe</ControlLabel>
                 <FormControl type="text" value={this.state.name} onChange={this.handleNameChange}/>
@@ -221,7 +217,7 @@ var EditRecipeModal = React.createClass({
 
           </Modal.Body>
           <Modal.Footer>
-          	<Button onClick={this.editRecipe} bsStyle="primary">Edit Recipe</Button>
+          	<Button onClick={this.handleSubmit} bsStyle="primary">Edit Recipe</Button>
             <Button onClick={this.close}>Close</Button>
           </Modal.Footer>
         </Modal>
@@ -229,7 +225,6 @@ var EditRecipeModal = React.createClass({
     );
   }
 });
-
 
 
 var RECIPES = [
