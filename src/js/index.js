@@ -1,14 +1,48 @@
-var RecipeList = React.createClass({
+var IngredientList = React.createClass({
+	deleteClick: function() {
+		alert("You have clicked delete");
+	},
+	editClick: function() {
+		alert("You have clicked edit");
+	},
 	render: function() {
 		var rows = [];
+		var Panel = ReactBootstrap.Panel;
+		var Button = ReactBootstrap.Button;
+		this.props.ingredients.forEach(function(ingredient) {
+			rows.push(<Panel>{ingredient}</Panel>)
+		});
+		return (
+			<div>
+			  {rows}
+				<Button bsStyle="danger" onClick={this.deleteClick}>Delete</Button>
+				<Button onClick={this.editClick}>Edit</Button>
+			</div>
+		);
+	}
+});
+
+var RecipeList = React.createClass({
+	addClick: function() {
+		alert("You have clicked Add Recipe");
+	},
+	render: function() {
+		var rows = [];
+		var ingredients = [];
 		var Accordion = ReactBootstrap.Accordion;
 		var Panel = ReactBootstrap.Panel;
+		var Button = ReactBootstrap.Button;
 		this.props.recipes.forEach(function(recipe) {
-			rows.push(<Panel header={recipe.name} eventKey={recipe.index}><p>Ingredients:</p><br/>{recipe.ingredients}</Panel>);
+			rows.push(<Panel header={recipe.name} eventKey={recipe.index}>
+				<p>Ingredients:</p>
+				<IngredientList ingredients={recipe.ingredients} />
+				</Panel>
+				);
 		});
 		return (
 			<div>
 				<Accordion>{rows}</Accordion>
+				<Button onClick={this.addClick} bsStyle="primary">Add Recipe</Button>
 			</div>
 		);
 	}
@@ -19,26 +53,6 @@ var RecipeTable = React.createClass({
 		return (
 			<div>
 			  <RecipeList recipes={this.props.recipes} />
-		  </div>
-		);
-	}
-});
-
-var AccordionPanel = React.createClass({
-	render: function() {
-		var Accordion = ReactBootstrap.Accordion;
-		var Panel = ReactBootstrap.Panel;
-
-		return (
-			<div>
-			  <Accordion>
-			    <Panel header="Peanut Butter Jelly">
-			    	Blah blah
-			    </Panel>
-			    <Panel header="Burrito" >
-			      some text here
-			    </Panel>
-			  </Accordion>
 		  </div>
 		);
 	}
