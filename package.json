@@ -8,7 +8,10 @@
     "gulp": "^3.9.1",
     "gulp-react": "^3.1.0",
     "gulp-sass": "^2.3.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "react": "^15.1.0",
+    "react-bootstrap": "^0.29.4",
+    "react-dom": "^15.1.0"
   },
   "devDependencies": {},
   "scripts": {
