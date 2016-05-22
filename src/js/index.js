@@ -42,7 +42,6 @@ var RecipeList = React.createClass({
 		return (
 			<div>
 				<Accordion>{rows}</Accordion>
-				<Button onClick={this.addClick} bsStyle="primary">Add Recipe</Button>
 			</div>
 		);
 	}
@@ -53,9 +52,94 @@ var RecipeTable = React.createClass({
 		return (
 			<div>
 			  <RecipeList recipes={this.props.recipes} />
+				<NewRecipeModal />
 		  </div>
 		);
 	}
+});
+
+var RecipeForm = React.createClass({
+  getInitialState: function() {
+    return {
+      value: ''
+    };
+  },
+
+  getValidationState: function() {
+    const length = this.state.value.length;
+    if (length > 2) return 'success';
+    else if (length > 0) return 'error';
+  },
+
+  handleChange: function(e) {
+    this.setState({ value: e.target.value });
+  },
+
+  render: function() {
+  	var FormGroup = ReactBootstrap.FormGroup;
+  	var FormControl = ReactBootstrap.FormControl;
+  	var ControlLabel = ReactBootstrap.ControlLabel;
+    return (
+      <form>
+        <FormGroup controlId="formBasicText" validationState={this.getValidationState()}>
+	        <ControlLabel>Recipe</ControlLabel>
+          <FormControl type="text"
+            value={this.state.value}
+            placeholder="Recipe name"
+            onChange={this.handleChange}/>
+	        <ControlLabel>Ingredients</ControlLabel>
+          <FormControl type="text"
+            value={this.state.value}
+            placeholder="Enter ingredients separated by commas"
+            onChange={this.handleChange}/>
+        </FormGroup>
+      </form>
+    );
+  }
+});
+
+var NewRecipeModal = React.createClass({
+
+  getInitialState: function() {
+    return { showModal: false };
+  },
+
+  close: function() {
+    this.setState({ showModal: false });
+  },
+
+  open: function() {
+    this.setState({ showModal: true });
+  },
+
+  addRecipe: function() {
+  	alert("Add a recipe");
+  },
+
+  render: function() {
+  	var Modal = ReactBootstrap.Modal;
+		var Button = ReactBootstrap.Button;
+    return (
+      <div>
+      	<Button onClick={this.open} bsStyle="primary">Add Recipe</Button>
+
+        <Modal show={this.state.showModal} onHide={this.close}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Recipe</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+
+	          <RecipeForm />
+
+          </Modal.Body>
+          <Modal.Footer>
+          	<Button onClick={this.addRecipe} bsStyle="primary">Add Recipe</Button>
+            <Button onClick={this.close}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    );
+  }
 });
 
 var RECIPES = [
