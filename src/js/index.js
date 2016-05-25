@@ -4,19 +4,22 @@ var IngredientList = React.createClass({
 		return {recipe: this.props.recipe}
 	},
 	handleRecipeEdit: function(recipe) {
-		this.setState({recipe: recipe});
+    this.props.onRecipeEdit(recipe);
 	},
+  handleRecipeDelete: function(recipe) {
+    this.props.onDelete(recipe);
+  },
 	render: function() {
 		var rows = [];
 		var Panel = ReactBootstrap.Panel;
 		var Button = ReactBootstrap.Button;
-		this.state.recipe.ingredients.forEach(function(ingredient) {
-			rows.push(<Panel>{ingredient}</Panel>)
-		});
+		this.props.recipe.ingredients.forEach(function(ingredient) {
+			rows.push(<Panel key={ingredient}>{ingredient}</Panel>)
+		}, this);
 		return (
 			<div>
 			  {rows}
-				<EditRecipeModal recipe={this.props.recipe} onRecipeEdit={this.handleRecipeEdit} />
+				<EditRecipeModal recipe={this.props.recipe} onRecipeEdit={this.handleRecipeEdit} onRecipeDelete={this.handleRecipeDelete} />
 			</div>
 		);
 	}
@@ -26,19 +29,39 @@ var RecipeList = React.createClass({
 	getInitialState: function() {
 		return {recipes: this.props.recipes}
 	},
+  handleRecipeDelete: function(delRecipe) {
+    var recipes = this.state.recipes;
+    for (var i = 0; i < recipes.length; i++) {
+      if (recipes[i].name === delRecipe.name) {
+        recipes.splice(i, 1);
+      }
+    }
+    this.setState({recipes: recipes});
+  },
+  handleRecipeEdit: function(editRecipe) {
+    var recipes = this.state.recipes;
+    for (var i = 0; i < recipes.length; i++) {
+      if (recipes[i].name === editRecipe.name) {
+        recipes[i].ingredients = editRecipe.ingredients;
+      }
+    }
+    console.log(recipes.ingredients)
+    console.log(this.state.recipes)
+    this.setState({recipes: recipes});
+  },
 	render: function() {
 		var rows = [];
 		var ingredients = [];
 		var Accordion = ReactBootstrap.Accordion;
 		var Panel = ReactBootstrap.Panel;
 		var index = 0;
-		this.state.recipes.forEach(function(recipe) {
-			rows.push(<Panel header={recipe.name} eventKey={index++}>
+		this.props.recipes.forEach(function(recipe) {
+      rows.push(<Panel header={recipe.name} eventKey={index++} key={index}>
 				<p>Ingredients:</p>
-				<IngredientList recipe={recipe} />
+				<IngredientList recipe={recipe} onDelete={this.handleRecipeDelete} onRecipeEdit={this.handleRecipeEdit} />
 				</Panel>
 				);
-		});
+		}, this);
 		return (
 			<div>
 				<Accordion>{rows}</Accordion>
@@ -52,16 +75,13 @@ var RecipeTable = React.createClass({
 		return {recipes: this.props.recipes}
 	},
 	handleRecipeSubmit: function(recipe) {
-		RECIPES.push(recipe);
-		this.setState({recipes: RECIPES});
-	},
-	handleRecipeUpdate: function() {
-		this.setState({recipes: RECIPES});
+    this.props.recipes.push(recipe);
+		this.setState({recipes: this.props.recipes});
 	},
 	render: function() {
 		return (
 			<div>
-			  <RecipeList recipes={this.state.recipes} />
+			  <RecipeList recipes={this.state.recipes}  />
 				<AddRecipeModal onRecipeSubmit={this.handleRecipeSubmit} />
 		  </div>
 		);
@@ -103,7 +123,7 @@ var AddRecipeModal = React.createClass({
   handleSubmit: function(e) {
   	e.preventDefault();
   	var name = this.state.name;
-  	var ingredients = this.state.ingredients.split(',')
+  	var ingredients = this.state.ingredients.split(',');
   	this.props.onRecipeSubmit({name: name, ingredients: ingredients});
   	this.close();
   	this.setState({name: '', ingredients: []});
@@ -181,12 +201,28 @@ var EditRecipeModal = React.createClass({
   	this.setState({ ingredients: e.target.value });
   },
 
-  handleSubmit: function(e) {
-  	e.preventDefault();
-  	var name = this.state.name;
-  	var ingredients = this.state.ingredients.split(',')
+  handleSubmit: function() {
+    var name = this.state.name;
+    var ingredients;
+    if (typeof this.state.ingredients === 'string'){
+      ingredients = this.state.ingredients.split(',');
+    } else {
+      ingredients = this.state.ingredients;
+    }
   	this.props.onRecipeEdit({name: name, ingredients: ingredients});
   	this.close();
+  },
+
+  handleDelete: function() {
+    var name = this.state.name;
+    var ingredients;
+    if (typeof this.state.ingredients === 'string'){
+      ingredients = this.state.ingredients.split(',');
+    } else {
+      ingredients = this.state.ingredients;
+    }
+    this.props.onRecipeDelete({name: name, ingredients: ingredients});
+    this.close();
   },
 
   render: function() {
@@ -197,7 +233,7 @@ var EditRecipeModal = React.createClass({
 		var ControlLabel = ReactBootstrap.ControlLabel;
     return (
       <div>
-	      <Button bsStyle="danger" onClick={this.deleteClick}>Delete</Button>
+	      <Button bsStyle="danger" onClick={this.handleDelete}>Delete</Button>
       	<Button onClick={this.open}>Edit Recipe</Button>
 
         <Modal show={this.state.showModal} onHide={this.close}>
@@ -209,7 +245,7 @@ var EditRecipeModal = React.createClass({
             <form>
               <FormGroup controlId="formBasicText" validationState={this.getValidationState()}>
       	        <ControlLabel>Recipe</ControlLabel>
-                <FormControl type="text" value={this.state.name} onChange={this.handleNameChange}/>
+                <FormControl type="text" value={this.state.name} onChange={this.handleNameChange} disabled/>
       	        <ControlLabel>Ingredients</ControlLabel>
                 <FormControl type="text" value={this.state.ingredients} onChange={this.handleIngredientChange}/>
               </FormGroup>
@@ -226,11 +262,10 @@ var EditRecipeModal = React.createClass({
   }
 });
 
-
 var RECIPES = [
-	{name: "Peanut Butter Jelly", ingredients: ["Peanut Butter", "Jelly", "Bread"]},
-	{name: "Burrito", ingredients: ["Beans", "Rice", "Tortilla", "Salsa"]}
-]
+  {name: "Peanut Butter Jelly", ingredients: ["Peanut Butter", "Jelly", "Bread"]},
+  {name: "Burrito", ingredients: ["Beans", "Rice", "Tortilla", "Salsa"]}
+];
 
 ReactDOM.render(
 	<RecipeTable recipes={RECIPES} />, 
