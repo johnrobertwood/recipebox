@@ -1,8 +1,4 @@
 var IngredientList = React.createClass({
-
-	getInitialState: function() {
-		return {recipe: this.props.recipe}
-	},
 	handleRecipeEdit: function(recipe) {
     this.props.onRecipeEdit(recipe);
 	},
@@ -36,6 +32,7 @@ var RecipeList = React.createClass({
         recipes.splice(i, 1);
       }
     }
+    localStorage.setItem('recipeBox', JSON.stringify(recipes));
     this.setState({recipes: recipes});
   },
   handleRecipeEdit: function(editRecipe) {
@@ -45,8 +42,7 @@ var RecipeList = React.createClass({
         recipes[i].ingredients = editRecipe.ingredients;
       }
     }
-    console.log(recipes.ingredients)
-    console.log(this.state.recipes)
+    localStorage.setItem('recipeBox', JSON.stringify(recipes));
     this.setState({recipes: recipes});
   },
 	render: function() {
@@ -71,11 +67,13 @@ var RecipeList = React.createClass({
 });
 
 var RecipeTable = React.createClass({
-	getInitialState: function() {
+  getInitialState: function() {
 		return {recipes: this.props.recipes}
 	},
 	handleRecipeSubmit: function(recipe) {
     this.props.recipes.push(recipe);
+    localStorage.setItem('recipeBox', JSON.stringify(this.props.recipes));
+    console.log(localStorage);
 		this.setState({recipes: this.props.recipes});
 	},
 	render: function() {
@@ -89,7 +87,6 @@ var RecipeTable = React.createClass({
 });
 
 var AddRecipeModal = React.createClass({
-
   getInitialState: function() {
     return { 
     	showModal: false,
@@ -97,38 +94,30 @@ var AddRecipeModal = React.createClass({
     	ingredients: ''
     };
   },
-
   close: function() {
     this.setState({ showModal: false });
   },
-
   open: function() {
     this.setState({ showModal: true });
   },
-
   getValidationState: function() {
     const length = this.state.name.length;
     if (length > 2) return 'success';
     else if (length > 0) return 'error';
   },
-
   handleNameChange: function(e) {
     this.setState({ name: e.target.value });
   },
-
   handleIngredientChange: function(e) {
 		this.setState({ingredients: e.target.value});
   },
-
-  handleSubmit: function(e) {
-  	e.preventDefault();
+  handleSubmit: function() {
   	var name = this.state.name;
   	var ingredients = this.state.ingredients.split(',');
   	this.props.onRecipeSubmit({name: name, ingredients: ingredients});
   	this.close();
   	this.setState({name: '', ingredients: []});
   },
-
   render: function() {
   	var Modal = ReactBootstrap.Modal;
 		var Button = ReactBootstrap.Button;
@@ -170,7 +159,6 @@ var AddRecipeModal = React.createClass({
 });
 
 var EditRecipeModal = React.createClass({
-
   getInitialState: function() {
     return { 
     	showModal: false,
@@ -178,29 +166,23 @@ var EditRecipeModal = React.createClass({
     	ingredients: this.props.recipe.ingredients 
     };
   },
-
   close: function() {
     this.setState({ showModal: false });
   },
-
   open: function() {
     this.setState({ showModal: true });
   },
-
   getValidationState: function() {
     const length = this.state.name.length;
     if (length > 2) return 'success';
     else if (length > 0) return 'error';
   },
-
   handleNameChange: function(e) {
     this.setState({ name: e.target.value });
   },
-
   handleIngredientChange: function(e) {
   	this.setState({ ingredients: e.target.value });
   },
-
   handleSubmit: function() {
     var name = this.state.name;
     var ingredients;
@@ -212,7 +194,6 @@ var EditRecipeModal = React.createClass({
   	this.props.onRecipeEdit({name: name, ingredients: ingredients});
   	this.close();
   },
-
   handleDelete: function() {
     var name = this.state.name;
     var ingredients;
@@ -224,7 +205,6 @@ var EditRecipeModal = React.createClass({
     this.props.onRecipeDelete({name: name, ingredients: ingredients});
     this.close();
   },
-
   render: function() {
   	var Modal = ReactBootstrap.Modal;
 		var Button = ReactBootstrap.Button;
@@ -262,7 +242,7 @@ var EditRecipeModal = React.createClass({
   }
 });
 
-var RECIPES = [
+var RECIPES = (typeof localStorage.recipeBox != "undefined") ? JSON.parse(localStorage.recipeBox) : [
   {name: "Peanut Butter Jelly", ingredients: ["Peanut Butter", "Jelly", "Bread"]},
   {name: "Burrito", ingredients: ["Beans", "Rice", "Tortilla", "Salsa"]}
 ];
@@ -271,3 +251,9 @@ ReactDOM.render(
 	<RecipeTable recipes={RECIPES} />, 
 	document.getElementById('container')
 );
+
+
+
+
+
+
