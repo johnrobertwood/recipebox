@@ -1,3 +1,8 @@
+var React = require('react');
+var ReactDOM = require('react-dom');
+var ReactBootstrap = require('react-bootstrap');
+require('../css/style.css');
+
 var IngredientList = React.createClass({
 	handleRecipeEdit: function(recipe) {
     this.props.onRecipeEdit(recipe);
@@ -12,10 +17,10 @@ var IngredientList = React.createClass({
 		this.props.recipe.ingredients.forEach(function(ingredient) {
 			rows.push(<Panel key={ingredient}>{ingredient}</Panel>)
 		}, this);
+    rows.push(<EditRecipeModal recipe={this.props.recipe} onRecipeEdit={this.handleRecipeEdit} onRecipeDelete={this.handleRecipeDelete} key={Date.now()}/>)
 		return (
 			<div>
 			  {rows}
-				<EditRecipeModal recipe={this.props.recipe} onRecipeEdit={this.handleRecipeEdit} onRecipeDelete={this.handleRecipeDelete} />
 			</div>
 		);
 	}
@@ -73,12 +78,12 @@ var RecipeTable = React.createClass({
 	handleRecipeSubmit: function(recipe) {
     this.props.recipes.push(recipe);
     localStorage.setItem('recipeBox', JSON.stringify(this.props.recipes));
-    console.log(localStorage);
 		this.setState({recipes: this.props.recipes});
 	},
 	render: function() {
 		return (
-			<div>
+      <div>
+        <h1>Recipe Box</h1>
 			  <RecipeList recipes={this.state.recipes}  />
 				<AddRecipeModal onRecipeSubmit={this.handleRecipeSubmit} />
 		  </div>
@@ -202,6 +207,7 @@ var EditRecipeModal = React.createClass({
     } else {
       ingredients = this.state.ingredients;
     }
+
     this.props.onRecipeDelete({name: name, ingredients: ingredients});
     this.close();
   },
