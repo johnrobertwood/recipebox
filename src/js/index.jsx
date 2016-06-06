@@ -10,20 +10,21 @@ var IngredientList = React.createClass({
   handleRecipeDelete: function(recipe) {
     this.props.onDelete(recipe);
   },
-	render: function() {
-		var rows = [];
-		var Panel = ReactBootstrap.Panel;
-		var Button = ReactBootstrap.Button;
-		this.props.recipe.ingredients.forEach(function(ingredient) {
-			rows.push(<Panel key={ingredient}>{ingredient}</Panel>)
-		}, this);
-    rows.push(<EditRecipeModal recipe={this.props.recipe} onRecipeEdit={this.handleRecipeEdit} onRecipeDelete={this.handleRecipeDelete} key={Date.now()}/>)
-		return (
-			<div>
-			  {rows}
-			</div>
-		);
-	}
+  render: function() {
+    var Panel = ReactBootstrap.Panel;
+    var Button = ReactBootstrap.Button;
+    var createItem = function(item) {
+      return <Panel key={item}>{item}</Panel>;
+    };
+    return (
+      <div>{this.props.recipe.ingredients.map(createItem)}
+        <EditRecipeModal 
+          recipe={this.props.recipe} 
+          onRecipeEdit={this.handleRecipeEdit} 
+          onRecipeDelete={this.handleRecipeDelete} 
+          key={Date.now()}/>
+      </div>);
+  }
 });
 
 var RecipeList = React.createClass({

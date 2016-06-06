@@ -56,20 +56,21 @@
 	  handleRecipeDelete: function(recipe) {
 	    this.props.onDelete(recipe);
 	  },
-		render: function() {
-			var rows = [];
-			var Panel = ReactBootstrap.Panel;
-			var Button = ReactBootstrap.Button;
-			this.props.recipe.ingredients.forEach(function(ingredient) {
-				rows.push(React.createElement(Panel, {key: ingredient}, ingredient))
-			}, this);
-	    rows.push(React.createElement(EditRecipeModal, {recipe: this.props.recipe, onRecipeEdit: this.handleRecipeEdit, onRecipeDelete: this.handleRecipeDelete, key: Date.now()}))
-			return (
-				React.createElement("div", null, 
-				  rows
-				)
-			);
-		}
+	  render: function() {
+	    var Panel = ReactBootstrap.Panel;
+	    var Button = ReactBootstrap.Button;
+	    var createItem = function(item) {
+	      return React.createElement(Panel, {key: item}, item);
+	    };
+	    return (
+	      React.createElement("div", null, this.props.recipe.ingredients.map(createItem), 
+	        React.createElement(EditRecipeModal, {
+	          recipe: this.props.recipe, 
+	          onRecipeEdit: this.handleRecipeEdit, 
+	          onRecipeDelete: this.handleRecipeDelete, 
+	          key: Date.now()})
+	      ));
+	  }
 	});
 
 	var RecipeList = React.createClass({displayName: "RecipeList",
